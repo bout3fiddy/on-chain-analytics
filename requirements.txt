@@ -1,0 +1,7 @@
+black
+eth-brownie
+pandas
+py-etherscan-api
+web3
+matplotlib
+seaborn

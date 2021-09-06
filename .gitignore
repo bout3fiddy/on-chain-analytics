@@ -1,0 +1,10 @@
+# misc
+.idea/
+*.csv
+.vscode
+
+# python
+__pycache__
+venv/
+.ipynb_checkpoints/
+
