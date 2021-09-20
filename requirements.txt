@@ -1,5 +1,6 @@
 black
 eth-brownie
+brownie-token-tester
 pandas
 py-etherscan-api
 web3
