@@ -1,0 +1,22 @@
+The objective of the simulator is to simulate a curve pool for different A parameters.
+
+To achieve this:
+
+1. ramp A.
+2. Fetch Etherscan txes with pool.
+3. Focus on add_liquidity, remove_liquidity and exchange transactions.
+4. get input for these tx types as a fraction of total token holdings of the address (msg.sender): 
+    a. how much cvxCRV/total_cvxCRV was added to pool?
+    b. how much as fraction of total was removed?
+    c. how much as a fraction of total was exchanged?
+
+5. Simulate each TX on etherscan with the ramped A parameter.
+6. Calculate:
+    a. add_liquidity: how many lp tokens received?
+    b. remove_liquidity: how many underlying tokens received?
+    c. exchange: how many tokens (dy) for (dx) = fractional share of address's total.
+
+7. Compare above with real world txes.
+
+
+This should give an idea of a pool's performance with new pool parameters.
