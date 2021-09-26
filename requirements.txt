@@ -6,3 +6,4 @@ py-etherscan-api
 web3
 matplotlib
 seaborn
+mako
