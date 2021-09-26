@@ -7,3 +7,4 @@ web3
 matplotlib
 seaborn
 mako
+asyncio
