@@ -8,3 +8,4 @@ matplotlib
 seaborn
 mako
 asyncio
+requests
