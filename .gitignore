@@ -2,6 +2,7 @@
 .idea/
 *.csv
 .vscode
+plots/
 
 # python
 __pycache__
