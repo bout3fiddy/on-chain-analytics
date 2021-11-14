@@ -42,7 +42,7 @@ def alchemy_asset_transfers(
     response_json = response_post.json()
     return response_json
 
-def get_lp_swaps(
+def get_asset_transfers(
         from_address: str,
         to_address: str,
         from_block: Union[int, str],
