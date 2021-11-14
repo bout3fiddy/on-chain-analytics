@@ -1,3 +1,4 @@
+import os
 import asyncio
 from aiohttp import ClientSession
 
@@ -5,12 +6,15 @@ from web3.providers.base import JSONBaseProvider
 
 from typing import List
 
+ALCHEMY_API_KEY = os.environ['ALCHEMY_API_KEY']
+ALCHEMY_RPC = f"https://eth-mainnet.alchemyapi.io/v2/{ALCHEMY_API_KEY}"
 
-def get_ethtx_receipt(transactions: List, eth_node_address: str):
+
+def get_ethtx_receipt(transactions: List):
 
     loop = asyncio.get_event_loop()
     future = asyncio.ensure_future(
-        async_getTransactionReceipt(eth_node_address, transactions)
+        async_getTransactionReceipt(ALCHEMY_RPC, transactions)
     )
     result = loop.run_until_complete(future)
 
@@ -36,9 +40,10 @@ async def async_getTransactionReceipt(node_address, transactions):
         for tran in transactions:
             task = asyncio.ensure_future(
                 async_make_request(
-                    session, node_address, "eth_getTransactionReceipt", [tran.hex()]
+                    session, node_address, "eth_getTransactionReceipt", [tran]
                 )
             )
             tasks.append(task)
 
         responses = await asyncio.gather(*tasks)
+    return responses
