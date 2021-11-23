@@ -32,5 +32,35 @@ def get_block_for_timestamp(timestamp: int):
         return None
 
 
+def get_timestamp_for_block(block: int):
+
+    query = (
+        f'''{{
+          blocks(
+          first: 1,
+          orderBy: number,
+          orderDirection: asc,
+          where: {{number_gt: "{block}"}}) {{
+            id
+            number
+            timestamp
+          }}
+        }}
+        '''
+    )
+
+    r = requests.post(ETH_BLOCKS_SUBGRAPH, json={'query': query})
+    payload = dict(r.json())
+
+    try:
+        return int(payload['data']['blocks'][0]['timestamp'])
+    except KeyError:
+        return None
+    except IndexError:
+        return None
+
+
 if __name__ == "__main__":
-    print(get_block_for_timestamp(timestamp=1577836800))
+    block_for_timestamp = get_block_for_timestamp(timestamp=1577836800)
+    print(block_for_timestamp)
+    print(get_timestamp_for_block(block_for_timestamp))
