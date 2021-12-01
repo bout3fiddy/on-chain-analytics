@@ -37,7 +37,7 @@ def alchemy_asset_transfers(
             "method": "alchemy_getAssetTransfers",
             "params": [parameters]
         },
-        )
+    )
 
     response_json = response_post.json()
     return response_json
