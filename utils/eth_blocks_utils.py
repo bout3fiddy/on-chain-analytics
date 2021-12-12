@@ -4,6 +4,13 @@ import requests
 ETH_BLOCKS_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks"
 
 
+def get_current_block():
+
+    r = requests.get("https://api.blockcypher.com/v1/eth/main")
+    payload = dict(r.json())
+    return int(payload['height'])
+
+
 def get_block_for_timestamp(timestamp: int):
 
     query = (
