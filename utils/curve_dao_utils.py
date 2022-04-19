@@ -1,15 +1,42 @@
+# these utility scripts are used to prepare, simulate and broadcast votes within Curve's DAO
+# modify the constants below according the the comments, and then use `simulate` in
+# a forked mainnet to verify the result of the vote prior to broadcasting on mainnet
+#
+# NOMENCLATURE:
+#
+# target: the intended target of the vote, should be one of the above constant dicts
+# sender: address to create the vote from - you will need to modify this prior to mainnet use
+# action: a list of calls to perform in the vote, formatted as a lsit of tuples
+#         in the format (target, function name, *input args).
+#         for example, to call:
+#         GaugeController("0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB").add_gauge("0xFA712...", 0, 0)
+#
+#         use the following:
+#         [("0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB", "add_gauge", "0xFA712...", 0, 0),]
+#
+#         commonly used addresses:
+#         GaugeController - 0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB
+#         GaugeProxy - 0x519AFB566c05E00cfB9af73496D00217A630e4D5
+#         PoolProxy - 0xeCb456EA5365865EbAb8a2661B0c503410e9B347
+# description: description of the vote, will be pinned to IPFS
+
 import json
 import warnings
 
 import requests
 
-from brownie import Contract, accounts, chain, network
+from typing import Dict, List, Tuple
+
+from brownie import chain, network
 from brownie.convert import to_address
+
+from utils import init_contract
 
 warnings.filterwarnings("ignore")
 
 
 # ------- CONSTANTS --------- #
+# addresses related to the DAO - these should not need modification
 
 CURVE_DAO_OWNERSHIP = {
     "agent": "0x40907540d8a6c65c637785e8f8b742ae6b0b9968",
@@ -37,7 +64,7 @@ EMERGENCY_DAO = {
 # ------- DAO VOTE SIM SCRIPTS --------- #
 
 
-def prepare_evm_script(target: dict, actions: dict) -> str:
+def prepare_evm_script(target: Dict, actions: Dict) -> str:
     """Generates EVM script to be executed by AragonDAO contracts.
 
     Args:
@@ -47,11 +74,11 @@ def prepare_evm_script(target: dict, actions: dict) -> str:
     Returns:
         str: Generated EVM script.
     """
-    agent = Contract(target["agent"])
+    agent = init_contract(target["agent"])
     evm_script = "0x00000001"
 
     for address, fn_name, *args in actions:
-        contract = Contract(address)
+        contract = init_contract(address)
         fn = getattr(contract, fn_name)
         calldata = fn.encode_input(*args)
         agent_calldata = agent.execute.encode_input(address, 0, calldata)[2:]
@@ -61,7 +88,7 @@ def prepare_evm_script(target: dict, actions: dict) -> str:
     return evm_script
 
 
-def make_vote(sender: str, target: dict, actions: list(tuple), description: str) -> str:
+def make_vote(sender: str, target: Dict, actions: List[Tuple], description: str) -> str:
     """Prepares EVM script and creates an on-chain AragonDAO vote.
 
     Note: this script can be used to deploy on-chain governance proposals as well.
@@ -86,7 +113,7 @@ def make_vote(sender: str, target: dict, actions: list(tuple), description: str)
     ipfs_hash = response.json()["Hash"]
     print(f"ipfs hash: {ipfs_hash}")
 
-    aragon = Contract(target["voting"])
+    aragon = init_contract(target["voting"])
     evm_script = prepare_evm_script(target, actions)
     if target.get("forwarder"):
         # the emergency DAO only allows new votes via a forwarder contract
@@ -97,7 +124,7 @@ def make_vote(sender: str, target: dict, actions: list(tuple), description: str)
         length = hex(len(vote_calldata) // 2)[2:].zfill(8)
         evm_script = f"0x00000001{aragon.address[2:]}{length}{vote_calldata}"
         print(f"Target: {target['forwarder']}\nEVM script: {evm_script}")
-        tx = Contract(target["forwarder"]).forward(evm_script, kw)
+        tx = init_contract(target["forwarder"]).forward(evm_script, kw)
     else:
         print(f"Target: {aragon.address}\nEVM script: {evm_script}")
         tx = aragon.newVote(evm_script, f"ipfs:{ipfs_hash}", False, False, kw)
@@ -108,7 +135,7 @@ def make_vote(sender: str, target: dict, actions: list(tuple), description: str)
     return vote_id
 
 
-def simulate(target: dict, actions: dict, description: str):
+def simulate(target: Dict, actions: List[Tuple], description: str):
     """Create AragonDAO vote and simulate passing vote on mainnet-fork.
 
     Args:
@@ -135,7 +162,7 @@ def simulate(target: dict, actions: dict, description: str):
     vote_id = make_vote(top_holder, target, actions, description)
 
     # vote
-    aragon = Contract(target["voting"])
+    aragon = init_contract(target["voting"])
     for acct in holders:
         aragon.vote(vote_id, True, False, {"from": acct})
 
