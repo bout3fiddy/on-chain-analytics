@@ -146,8 +146,10 @@ def simulate(target: Dict, actions: List[Tuple], description: str):
     # fetch the top holders so we can pass the vote
     data = requests.get(
         f"https://api.ethplorer.io/getTopTokenHolders/{target['token']}",
-        params={"apiKey": "freekey", "limit": 50},
+        params={"apiKey": "freekey", "limit": 100},
     ).json()["holders"][::-1]
+
+    assert len(data) > 0
 
     # create a list of top holders that will be sufficient to make quorum
     holders = []
