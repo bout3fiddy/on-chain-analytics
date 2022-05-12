@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 
-CRV_EMISSIONS = "https://api.thegraph.com/subgraphs/name/convex-community/crv-emissions"
+from utils.subgraph_utils.constants import CRV_EMISSIONS, SUBGRAPH_API
 
 
 def get_curve_fees(pool_token_addr: str) -> pd.DataFrame:
@@ -31,3 +31,4 @@ def get_curve_fees(pool_token_addr: str) -> pd.DataFrame:
         raise f"No data in subgraph for: {pool_token_addr}"
 
     return data
+
