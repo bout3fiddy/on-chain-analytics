@@ -19,7 +19,7 @@ def get_block_for_timestamp(timestamp: int):
           first: 1,
           orderBy: timestamp,
           orderDirection: asc,
-          where: {{timestamp_gt: "{timestamp}"}}) {{
+          where: {{timestamp_gt: "{int(timestamp)}"}}) {{
             id
             number
             timestamp
@@ -47,7 +47,7 @@ def get_timestamp_for_block(block: int):
           first: 1,
           orderBy: number,
           orderDirection: asc,
-          where: {{number_gt: "{block}"}}) {{
+          where: {{number_gt: "{int(block)}"}}) {{
             id
             number
             timestamp
